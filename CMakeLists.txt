@@ -4,7 +4,7 @@ project( AA-SIPP-m )
 
 include_directories( "." )
 
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O2 -Wall -Wextra" )
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O2")# -Wall -Wextra" )
 set( CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++" )
 
 set( SOURCE_FILES 

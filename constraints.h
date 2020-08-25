@@ -19,6 +19,7 @@ public:
     std::vector<SafeInterval> getSafeIntervals(Node curNode, const std::unordered_multimap<int, Node> &close, int w);
     std::vector<SafeInterval> getSafeIntervals(Node curNode);
     void addConstraints(const std::vector<Node> &sections, double size, double mspeed, const Map &map);
+	void addFovConstraints(const std::vector<Node> &sections, double size, double mspeed, const Map &map, double fovWidth, double fovHeight);
     std::vector<SafeInterval> findIntervals(Node curNode, std::vector<double> &EAT, const std::unordered_multimap<int, Node> &close, const Map &map);
     SafeInterval getSafeInterval(int i, int j, int n) {return safe_intervals[i][j][n];}
     void resetSafeIntervals(int width, int height);

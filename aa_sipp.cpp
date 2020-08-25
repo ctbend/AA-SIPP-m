@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include "aa_sipp.h"
 
 AA_SIPP::AA_SIPP(const Config &config)
@@ -351,13 +352,20 @@ SearchResult AA_SIPP::startSearch(Map &map, Task &task, DynamicObstacles &obstac
                 auto cells = lineofsight.getCells(curagent.start_i, curagent.start_j);
                 constraints->removeStartConstraint(cells, curagent.start_i, curagent.start_j);
             }
-            if(findPath(current_priorities[numOfCurAgent], map))
-                constraints->addConstraints(sresult.pathInfo[current_priorities[numOfCurAgent]].sections, curagent.size, curagent.mspeed, map);
+			if (findPath(current_priorities[numOfCurAgent], map)) {
+				constraints->addConstraints(sresult.pathInfo[current_priorities[numOfCurAgent]].sections, curagent.size, curagent.mspeed, map);
+				//constraints->addFovConstraints(sresult.pathInfo[current_priorities[numOfCurAgent]].sections, curagent.size, curagent.mspeed, map, 10.0, 10.0);
+			}
             else
             {
                 bad_i = current_priorities[numOfCurAgent];
                 break;
             }
+			std::vector<conflict> confs = CheckConflicts(task);
+			if (confs.size() > 0) {
+				bad_i = current_priorities[numOfCurAgent];
+				break;
+			}
             if(numOfCurAgent + 1 == task.getNumberOfAgents())
                 solution_found = true;
         }

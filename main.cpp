@@ -15,24 +15,24 @@ int main(int argc, char* argv[])
         else
         {
             std::cout<<"Wrong number of input XML-files. It should be either all-in-one file, or three ones: map-file, task-file and config-file.\n";
-            return 0;
+            return 1;
         }
         if (!mission.getConfig())
-            return 0;
+            return 1;
         else
             std::cout<<"CONFIG LOADED\n";
 
         if (!mission.getMap())
         {
             std::cout<<"Program terminated.\n";
-            return 0;
+            return 1;
         }
         else
             std::cout<<"MAP LOADED\n";
         if (!mission.getTask())
         {
             std::cout<<"Program terminated.\n";
-            return 0;
+            return 1;
         }
         else
             std::cout<<"TASK LOADED\n";
@@ -47,5 +47,5 @@ int main(int argc, char* argv[])
         mission.printSearchResultsToConsole();
         mission.saveSearchResultsToLog();
     }
-    return 1;
+    return 0;
 }

@@ -76,24 +76,24 @@ bool Map::getMap(const char* FileName)
 
         for(k = 0; k < strlen(rowtext); k++)
         {
-            if (rowtext[k] == ' ')
+            if (!std::isspace(rowtext[k]))
             {
-                stream << value;
+                stream << rowtext[k];
                 stream >> Grid[i][j];
                 stream.clear();
                 stream.str("");
-                value = "";
+                //value = "";
                 j++;
             }
-            else
+           /* else
             {
                 value += rowtext[k];
-            }
+            }*/
         }
-        stream << value;
+        /*stream << value;
         stream >> Grid[i][j];
         stream.clear();
-        stream.str("");
+        stream.str("");*/
 
         if (j < width-1)
         {

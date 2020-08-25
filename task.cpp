@@ -34,7 +34,7 @@ bool Task::getTask(const char *fileName)
         defaultGHeading = element->DoubleAttribute(CNS_TAG_ATTR_GHEADING);
         if(element->Attribute(CNS_TAG_ATTR_GHEADING) == CNS_HEADING_WHATEVER)
             defaultGHeading = CN_HEADING_WHATEVER;
-        if(defaultSize <= 0 || defaultSize > 10.0)
+        if(defaultSize <= 0 || defaultSize > 20.0)
         {
             std::cout<<"Incorrect value of default "<<CNS_TAG_ATTR_SIZE" parameter. The value is set to "<< CN_DEFAULT_SIZE<<".\n";
             defaultSize = CN_DEFAULT_SIZE;
@@ -99,7 +99,7 @@ bool Task::getTask(const char *fileName)
             agent.goal_heading = element->DoubleAttribute(CNS_TAG_ATTR_GHEADING);
         else
             agent.goal_heading = defaultGHeading;
-        if(agent.size <= 0 || agent.size > 10.0)
+        if(agent.size <= 0 || agent.size > 20.0)
         {
             std::cout<<"Incorrect value of "<<CNS_TAG_ATTR_SIZE<<" attribute of agent "<<agent.id<<". It's set to default value "<<defaultSize<<".\n";
             agent.size = defaultSize;
