@@ -1,6 +1,8 @@
 #include "task.h"
 using namespace tinyxml2;
 
+extern bool homogenous = false;
+
 bool Task::getTask(const char *fileName)
 {
     XMLDocument doc;
@@ -16,7 +18,8 @@ bool Task::getTask(const char *fileName)
         return false;
     }
     double defaultSize(CN_DEFAULT_SIZE), defaultRSpeed(CN_DEFAULT_RSPEED), defaultMSpeed(CN_DEFAULT_MSPEED),
-           defaultSHeading(CN_DEFAULT_SHEADING), defaultGHeading(CN_DEFAULT_GHEADING);
+           defaultSHeading(CN_DEFAULT_SHEADING), defaultGHeading(CN_DEFAULT_GHEADING), defaultFovX(CN_DEFAULT_FOVX),
+			defaultFovY(CN_DEFAULT_FOVY);
 
     root = root->FirstChildElement(CNS_TAG_AGENTS);
     if (!root)
@@ -24,6 +27,20 @@ bool Task::getTask(const char *fileName)
         std::cout << "No '"<<CNS_TAG_AGENTS<<"' element found in XML file."<<std::endl;
         return false;
     }
+	if (root->Attribute(CNS_TAG_ATTR_FOVX)) {
+		fovx = root->DoubleAttribute(CNS_TAG_ATTR_FOVX);
+	}
+	else {
+		std::cout << "No " << CNS_TAG_ATTR_FOVX << " value set. Reverting to default: " << defaultFovX <<std::endl;
+		fovx = defaultFovX;
+	}
+	if (root->Attribute(CNS_TAG_ATTR_FOVY)) {
+		fovy = root->DoubleAttribute(CNS_TAG_ATTR_FOVY);
+	}
+	else {
+		std::cout << "No " << CNS_TAG_ATTR_FOVY << " value set. Reverting to default: " << defaultFovY << std::endl;
+		fovy = defaultFovY;
+	}
     XMLElement *element = root->FirstChildElement(CNS_TAG_DEF_PARAMS);
     if(element)
     {
@@ -127,6 +144,21 @@ bool Task::getTask(const char *fileName)
         k++;
         agents.push_back(agent);
     }
+	double prevSize = agents[0].size;
+	extern bool homogenous;
+	homogenous = true;
+	for (Agent a : agents) {
+		if (a.size != prevSize) {
+			homogenous = false;
+			break;
+		}
+	}
+	if (homogenous) {
+		std::cout << "Homogenous agents" << std::endl;
+	}
+	else {
+		std::cout << "Heterogenous agents" << std::endl;
+	}
     return true;
 }
 
@@ -146,6 +178,15 @@ bool Task::validateTask(const Map &map)
             std::cout<<"Error! Goal position of agent "<<a.id<<" is invalid.\n";
             return false;
         }
+		if (fovx == CN_DEFAULT_FOVX && fovy == CN_DEFAULT_FOVY) {
+			continue;
+		}
+		if (fovx <= a.size) {
+			std::cout << "Error! Size of agent " << a.id << " is too large for fovx " << fovx;
+		}
+		if (fovy <= a.size) {
+			std::cout << "Error! Size of agent " << a.id << " is too large for fovy " << fovy;
+		}
     }
     for(int i = 0; i < agents.size(); i++)
         for(int j = i + 1; j < agents.size(); j++)
@@ -161,6 +202,21 @@ bool Task::validateTask(const Map &map)
                 std::cout<<"Error! Goal positions of agents "<< a1.id <<" and "<< a2.id <<" are placed too close.\n";
                 return false;
             }
+			if (fovx == CN_DEFAULT_FOVX && fovy == CN_DEFAULT_FOVY) {
+				continue;
+			}
+			if (fabs(a1.start_i - a2.start_i) > fovy - (a1.size + a2.size) + CN_EPSILON || fabs(a1.start_j - a2.start_j) > fovx - (a1.size + a2.size) + CN_EPSILON){
+				std::cout << "Error! Start positions of agents " << a1.id << " and " << a2.id << " are placed too far apart for fov size " << fovx << "x" << fovy <<".\n";
+				std::cout << "Separation is " << fabs(a1.start_i - a2.start_i) << "," << fabs(a1.start_j - a2.start_j) << std::endl;
+				std::cout << "Don't forget to account for the agent radius" << std::endl;
+				return false;
+			}
+			if (fabs(a1.goal_i - a2.goal_i) > fovy - (a1.size + a2.size) + CN_EPSILON || fabs(a1.goal_j - a2.goal_j) > fovx - (a1.size + a2.size) + CN_EPSILON) {
+				std::cout << "Error! Goal positions of agents " << a1.id << " and " << a2.id << " are placed too far apart for fov size " << fovx << "x" << fovy << ".\n";
+				std::cout << "Separation is " << fabs(a1.goal_i - a2.goal_i) << "," << fabs(a1.goal_j - a2.goal_j) << std::endl;
+				std::cout << "Don't forget to account for the agent radius" << std::endl;
+				return false;
+			}
         }
     return true;
 }

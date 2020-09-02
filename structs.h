@@ -118,6 +118,8 @@ public:
 
     Point(double _i = 0.0, double _j = 0.0):i (_i), j (_j){}
     Point operator-(Point &p){return Point(i - p.i, j - p.j);}
+	Point operator*(double &d){return Point(i * d, j * d);}
+	Point operator+(Point &p) {return Point(i + p.i, j + p.j);}
     int operator== (Point &p){return (i == p.i) && (j == p.j);}
     int classify(Point &pO, Point &p1)
     {

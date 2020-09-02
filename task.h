@@ -17,6 +17,7 @@ public:
     Agent getAgent(unsigned int id) const;
     unsigned int getNumberOfAgents() const;
     bool validateTask(const Map &map);
+	double fovx, fovy;
 };
 
 #endif // TASK_H

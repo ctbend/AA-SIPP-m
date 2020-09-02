@@ -67,6 +67,56 @@ double AA_SIPP::calcHeading(const Node &node, const Node &son)
     return heading;
 }
 
+std::vector<std::pair<int,Point>> AA_SIPP::agentLocationsAtTime(double t) {
+	std::vector<std::pair<int, Point>> locations;
+	for (int i = 0; i < sresult.agents; i++){
+		auto path = sresult.pathInfo[i];
+		if (!path.pathfound) {
+			continue;
+		}
+		Point p;
+		double g0 = 0.0;
+		double g1 = 0.0;
+		for (auto section : path.sections) {
+			g0 = g1;
+			g1 = section.g;
+			if (section.g < t) {
+				p = Point(section.i, section.j);
+			}
+			else {
+				if ((g0 == 0.0) && (g1 == 0.0) && (t == 0.0)) {
+					locations.push_back(std::pair<int, Point>(current_priorities[i],Point(section.i, section.j)));
+				}
+				double scale = (t - g0) / (g1 - g0);
+				Point vector = Point(section.i, section.j) - p;
+				Point location = p+(vector * scale);
+				locations.push_back(std::pair<int, Point>(current_priorities[i], location));
+				break;
+			}
+		}
+	}
+	return locations;
+}
+
+bool AA_SIPP::withinFov(Node n) {
+	if (currentTask->fovx == CN_DEFAULT_FOVX && currentTask->fovy == CN_DEFAULT_FOVY) {
+		return true;
+	}
+	std::vector<std::pair<int, Point>> locations = agentLocationsAtTime(n.g);
+	Point np(n.i, n.j);
+	Point dist;
+	bool withinFov = true;
+	for (auto loc : locations) {
+		auto agent = currentTask->getAgent(loc.first);
+		dist = np - loc.second;
+		if (fabs(dist.i) > currentTask->fovy - (2*agent.size) + CN_EPSILON || fabs(dist.j) > currentTask->fovx - (2*agent.size) + CN_EPSILON) {
+			withinFov = false;
+			break;
+		}
+	}
+	return withinFov;
+}
+
 std::list<Node> AA_SIPP::findSuccessors(const Node curNode, const Map &map)
 {
     Node newNode, angleNode;
@@ -76,56 +126,60 @@ std::list<Node> AA_SIPP::findSuccessors(const Node curNode, const Map &map)
     double h_value;
     auto parent = &(close.find(curNode.i*map.width + curNode.j)->second);
     std::vector<Node> moves = map.getValidMoves(curNode.i, curNode.j, config->connectedness, curagent.size);
-    for(auto m:moves)
-        if(lineofsight.checkTraversability(curNode.i + m.i,curNode.j + m.j,map))
-        {
-            newNode.i = curNode.i + m.i;
-            newNode.j = curNode.j + m.j;
-            constraints->updateCellSafeIntervals({newNode.i,newNode.j});
-            newNode.heading = calcHeading(curNode, newNode);
-            angleNode = curNode; //the same state, but with extended g-value
-            angleNode.g += getRCost(angleNode.heading, newNode.heading) + config->additionalwait;//to compensate the amount of time required for rotation
-            newNode.g = angleNode.g + m.g/curagent.mspeed;
-            newNode.Parent = &angleNode;
-            h_value = getHValue(newNode.i, newNode.j);
+	for (auto m : moves) {
+		if (lineofsight.checkTraversability(curNode.i + m.i, curNode.j + m.j, map))
+		{
+			newNode.i = curNode.i + m.i;
+			newNode.j = curNode.j + m.j;
+			constraints->updateCellSafeIntervals({ newNode.i,newNode.j });
+			newNode.heading = calcHeading(curNode, newNode);
+			angleNode = curNode; //the same state, but with extended g-value
+			angleNode.g += getRCost(angleNode.heading, newNode.heading) + config->additionalwait;//to compensate the amount of time required for rotation
+			newNode.g = angleNode.g + m.g / curagent.mspeed;
+			newNode.Parent = &angleNode;
+			h_value = getHValue(newNode.i, newNode.j);
 
-            if(angleNode.g <= angleNode.interval.end)
-            {
-                intervals = constraints->findIntervals(newNode, EAT, close, map);
-                for(unsigned int k = 0; k < intervals.size(); k++)
-                {
-                    newNode.interval = intervals[k];
-                    newNode.Parent = parent;
-                    newNode.g = EAT[k];
-                    newNode.F = newNode.g + h_value;
-                    successors.push_front(newNode);
-                }
-            }
-            if(config->allowanyangle)
-            {
-                newNode = resetParent(newNode, curNode, map);
-                if(newNode.Parent->i != parent->i || newNode.Parent->j != parent->j)
-                {
-                    angleNode = *newNode.Parent;
-                    newNode.heading = calcHeading(*newNode.Parent, newNode);//new heading with respect to new parent
-                    angleNode.g += getRCost(angleNode.heading, newNode.heading) + config->additionalwait;//count new additional time required for rotation
-                    newNode.g += getRCost(angleNode.heading, newNode.heading) + config->additionalwait;
-                    newNode.Parent = &angleNode;
-                    if(angleNode.g > angleNode.interval.end)
-                        continue;
-                    intervals = constraints->findIntervals(newNode, EAT, close, map);
-                    for(unsigned int k = 0; k < intervals.size(); k++)
-                    {
-                        newNode.interval = intervals[k];
-                        newNode.Parent = parent->Parent;
-                        newNode.g = EAT[k];
-                        newNode.F = newNode.g + h_value;
-                        successors.push_front(newNode);
-                    }
-                }
-            }
-        }
-
+			if (angleNode.g <= angleNode.interval.end)
+			{
+				intervals = constraints->findIntervals(newNode, EAT, close, map);
+				for (unsigned int k = 0; k < intervals.size(); k++)
+				{
+					newNode.interval = intervals[k];
+					newNode.Parent = parent;
+					newNode.g = EAT[k];
+					newNode.F = newNode.g + h_value;
+					if (withinFov(newNode)) {
+						successors.push_front(newNode);
+					}
+				}
+			}
+			if (config->allowanyangle)
+			{
+				newNode = resetParent(newNode, curNode, map);
+				if (newNode.Parent->i != parent->i || newNode.Parent->j != parent->j)
+				{
+					angleNode = *newNode.Parent;
+					newNode.heading = calcHeading(*newNode.Parent, newNode);//new heading with respect to new parent
+					angleNode.g += getRCost(angleNode.heading, newNode.heading) + config->additionalwait;//count new additional time required for rotation
+					newNode.g += getRCost(angleNode.heading, newNode.heading) + config->additionalwait;
+					newNode.Parent = &angleNode;
+					if (angleNode.g > angleNode.interval.end)
+						continue;
+					intervals = constraints->findIntervals(newNode, EAT, close, map);
+					for (unsigned int k = 0; k < intervals.size(); k++)
+					{
+						newNode.interval = intervals[k];
+						newNode.Parent = parent->Parent;
+						newNode.g = EAT[k];
+						newNode.F = newNode.g + h_value;
+						if (withinFov(newNode)) {
+							successors.push_front(newNode);
+						}
+					}
+				}
+			}
+		}
+	}
     return successors;
 }
 
@@ -312,6 +366,7 @@ SearchResult AA_SIPP::startSearch(Map &map, Task &task, DynamicObstacles &obstac
     QueryPerformanceCounter(&begin);
     QueryPerformanceFrequency(&freq);
 #endif
+	currentTask = &task;
     bool solution_found(false);
     int tries(0), bad_i(0);
     double timespent(0);
@@ -444,8 +499,10 @@ bool AA_SIPP::findPath(unsigned int numOfCurAgent, const Map &map)
         open[curNode.i].pop_front();
         openSize--;
         close.insert({curNode.i * map.width + curNode.j, curNode});
-        for(Node s:findSuccessors(curNode, map))
-            addOpen(s);
+		std::list<Node> successors = findSuccessors(curNode, map);
+		for (Node s : successors) {
+			addOpen(s);
+		}
     }
     if(goalNode.g < CN_INFINITY)
     {

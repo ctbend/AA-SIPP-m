@@ -28,7 +28,9 @@
 #define CNS_DEFAULT_PLANFORTURNS            "false"
 #define CN_DEFAULT_ADDITIONALWAIT           0
 #define CN_DEFAULT_STARTSAFEINTERVAL        0
-#define CN_DEFAULT_INFLATEINTERVALS          0
+#define CN_DEFAULT_INFLATEINTERVALS         0
+#define CN_DEFAULT_FOVX						0.0
+#define CN_DEFAULT_FOVY						0.0
 
 #define CN_HEADING_WHATEVER                 -1
 #define CNS_HEADING_WHATEVER                "whatever"
@@ -156,6 +158,8 @@
     #define CNS_TAG_ATTR_FLOWTIME       "flowtime"
     #define CNS_TAG_ATTR_AVGLENGTH      "avglength"
     #define CNS_TAG_ATTR_MAKESPAN       "makespan"
+	#define CNS_TAG_ATTR_FOVX			"fovx"
+	#define CNS_TAG_ATTR_FOVY			"fovy"
 
 /*
  * End of XML files tag's attributes -------------------------------------------
@@ -172,7 +176,5 @@
 #define CN_COINCIDENT        2
 #define CN_NONINTERSECTING   3
 #define CN_INTERSECTING      4
-
-
 
 #endif

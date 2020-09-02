@@ -35,6 +35,8 @@ private:
     double getCost(int a_i, int a_j, int b_i, int b_j);
     double getRCost(double headingA, double headingB);
     double calcHeading(const Node &node, const Node &son);
+	std::vector<std::pair<int,Point>> agentLocationsAtTime(double t);
+	bool withinFov(Node n);
     std::list<Node> findSuccessors(const Node curNode, const Map &map);
     void makePrimaryPath(Node curNode);
     void makeSecondaryPath(Node curNode);
@@ -55,6 +57,7 @@ private:
     std::vector<int> current_priorities;
     LineOfSight lineofsight;
     Agent curagent;
+	Task *currentTask;
     Constraints *constraints;
     std::shared_ptr<const Config> config;
 };

@@ -250,35 +250,6 @@ void Constraints::addConstraints(const std::vector<Node> &sections, double size,
     }
 }
 
-void Constraints::addFovConstraints(const std::vector<Node> &sections, double size, double mspeed, const Map &map, double fovWidth, double fovHeight)
-{
-	std::vector<std::pair<int, int>> cells;
-	LineOfSight los(size);
-	section sec(sections.back(), sections.back());
-	sec.g2 = CN_INFINITY;
-	sec.size = size;
-	sec.mspeed = mspeed;
-	cells = los.getCellsCrossedByLine(sec.i1, sec.j1, sec.i2, sec.j2, map);
-	for (auto cell : cells)
-		constraints[cell.first][cell.second].push_back(sec);
-	if (sec.g1 == 0)
-		for (auto cell : cells)
-			safe_intervals[cell.first][cell.second].clear();
-	for (unsigned int a = 1; a < sections.size(); a++)
-	{
-		cells = los.getCellsCrossedByLine(sections[a - 1].i, sections[a - 1].j, sections[a].i, sections[a].j, map);
-		sec = section(sections[a - 1], sections[a]);
-		sec.size = size;
-		sec.mspeed = mspeed;
-		for (unsigned int i = 0; i < cells.size(); i++)
-			constraints[cells[i].first][cells[i].second].push_back(sec);
-		/*if(a+1 == sections.size())
-			updateSafeIntervals(cells,sec,true);
-		else
-			updateSafeIntervals(cells,sec,false);*/
-	}
-}
-
 std::vector<SafeInterval> Constraints::findIntervals(Node curNode, std::vector<double> &EAT, const std::unordered_multimap<int, Node> &close, const Map &map)
 {
     std::vector<SafeInterval> curNodeIntervals = getSafeIntervals(curNode, close, map.width);

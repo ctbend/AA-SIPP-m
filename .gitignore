@@ -3,3 +3,7 @@
 /.vs
 /build
 *.xml
+aa_sipp_MULTITHREAD_BROKEN.cpp
+aa_sipp_MULTITHREAD_BROKEN.h
+ThreadPool.h
+Threadpool COPYING.txt
