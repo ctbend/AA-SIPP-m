@@ -70,14 +70,13 @@ double AA_SIPP::calcHeading(const Node &node, const Node &son)
 std::vector<std::pair<int,Point>> AA_SIPP::agentLocationsAtTime(double t) {
 	std::vector<std::pair<int, Point>> locations;
 	for (int i = 0; i < sresult.agents; i++){
-		auto path = sresult.pathInfo[i];
-		if (!path.pathfound) {
+		if (!sresult.pathInfo[i].pathfound) {
 			continue;
 		}
 		Point p;
 		double g0 = 0.0;
 		double g1 = 0.0;
-		for (auto section : path.sections) {
+		for (auto section : sresult.pathInfo[i].sections) {
 			g0 = g1;
 			g1 = section.g;
 			if (section.g < t) {
@@ -96,6 +95,26 @@ std::vector<std::pair<int,Point>> AA_SIPP::agentLocationsAtTime(double t) {
 		}
 	}
 	return locations;
+}
+
+std::vector<std::vector<Point>> AA_SIPP::agentLocations() {
+	std::vector<std::vector<Point>> all_locations;
+	for (int i = 0; i < sresult.agents; i++) {
+		auto path = sresult.pathInfo[i];
+		if (!path.pathfound) {
+			continue;
+		}
+		std::vector<Point> locations;
+		Point p;
+		double g0 = 0.0;
+		for (auto section : path.sections) {
+			for (int j = g0; j < section.g; j++) {
+
+			}
+		}
+
+	}
+	return all_locations;
 }
 
 bool AA_SIPP::withinFov(Node n) {
@@ -131,6 +150,7 @@ std::list<Node> AA_SIPP::findSuccessors(const Node curNode, const Map &map)
 		{
 			newNode.i = curNode.i + m.i;
 			newNode.j = curNode.j + m.j;
+			//std::cout << newNode.i << " " << newNode.j << std::endl;
 			constraints->updateCellSafeIntervals({ newNode.i,newNode.j });
 			newNode.heading = calcHeading(curNode, newNode);
 			angleNode = curNode; //the same state, but with extended g-value
@@ -488,6 +508,7 @@ bool AA_SIPP::findPath(unsigned int numOfCurAgent, const Map &map)
     constraints->resetSafeIntervals(map.width, map.height);
     constraints->updateCellSafeIntervals({curagent.start_i, curagent.start_j});
     Node curNode(curagent.start_i, curagent.start_j, 0, 0), goalNode(curagent.goal_i, curagent.goal_j, CN_INFINITY, CN_INFINITY);
+	std::cout << "Start " << curagent.start_i << " " << curagent.start_j << " Goal " << curagent.goal_i << " " << curagent.goal_j  << std::endl;
     curNode.F = getHValue(curNode.i, curNode.j);
     curNode.interval = constraints->getSafeInterval(curNode.i, curNode.j, 0);
     curNode.heading = curagent.start_heading;

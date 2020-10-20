@@ -39,10 +39,12 @@
 #define CN_LOGLVL_NO	0
 #define CN_LOGLVL_NORM	1
 #define CN_LOGLVL_ALL   2
+#define CN_LOGLVL_NOMAP 3
 
 #define CNS_LOGLVL_NO	"none"
 #define CNS_LOGLVL_NORM	"regular"
 #define CNS_LOGLVL_FULL "full"
+#define CNS_LOGLVL_NOMAP "nomap"
 
 //initial prioritization
 #define CN_IP_SHORTESTF  1
@@ -63,6 +65,10 @@
 #define CNS_RE_NO        "no"
 #define CNS_RE_RULED     "rulebased"
 #define CNS_RE_RANDOM    "random"
+
+//map types
+#define CNS_TYPE_GRID		"grid"
+#define CNS_TYPE_OBSTACLES	"obstacles"
 
 /*
  * XML file tags ---------------------------------------------------------------
@@ -95,6 +101,7 @@
     #define CNS_TAG_LOGFILENAME             "logfilename"
     #define CNS_TAG_DYNAMICOBSTACLES        "dynamicobstacles"
     #define CNS_TAG_OBSTACLE                "obstacle"
+	#define CNS_TAG_OBSTACLES               "obstacles"
     #define CNS_TAG_LOG                     "log"
         #define CNS_TAG_MAPFN               "mapfilename"
         #define CNS_TAG_TASKFN              "taskfilename"
@@ -160,6 +167,7 @@
     #define CNS_TAG_ATTR_MAKESPAN       "makespan"
 	#define CNS_TAG_ATTR_FOVX			"fovx"
 	#define CNS_TAG_ATTR_FOVY			"fovy"
+	#define CNS_TAG_ATTR_TYPE			"type"
 
 /*
  * End of XML files tag's attributes -------------------------------------------

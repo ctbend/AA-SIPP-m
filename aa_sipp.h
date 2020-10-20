@@ -36,6 +36,7 @@ private:
     double getRCost(double headingA, double headingB);
     double calcHeading(const Node &node, const Node &son);
 	std::vector<std::pair<int,Point>> agentLocationsAtTime(double t);
+	std::vector<std::vector<Point>> agentLocations();
 	bool withinFov(Node n);
     std::list<Node> findSuccessors(const Node curNode, const Map &map);
     void makePrimaryPath(Node curNode);

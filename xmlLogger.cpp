@@ -31,7 +31,7 @@ void XmlLogger::writeToLogInput(const char *taskName, const char *mapName, const
 {
     if (loglevel == CN_LOGLVL_NO)
         return;
-    else if(loglevel == CN_LOGLVL_NORM)
+    else if(loglevel == CN_LOGLVL_NORM || loglevel == CN_LOGLVL_NOMAP)
     {
         XMLElement *log = doc->FirstChildElement(CNS_TAG_ROOT)->FirstChildElement(CNS_TAG_LOG);
         XMLElement *element = doc->NewElement(CNS_TAG_TASKFN);
@@ -180,7 +180,7 @@ void XmlLogger::writeToLogPath(const SearchResult &sresult, const Task &task, co
 
 void XmlLogger::writeToLogMap(const Map &map, const SearchResult &sresult)
 {
-    if (loglevel == CN_LOGLVL_NO)
+    if (loglevel == CN_LOGLVL_NO || loglevel == CN_LOGLVL_NOMAP)
         return;
     std::string text;
     std::vector<int> curLine(map.width, 0);
